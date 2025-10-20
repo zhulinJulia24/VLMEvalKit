@@ -33,12 +33,13 @@ jobs:
       fail-fast: false
       matrix:
         dataset: ["MMBench_V11_MINI MMStar_MINI AI2D_MINI","OCRBench_MINI"]
+        model: ['llava-onevision-qwen2-7b-ov-hf', 'InternVL3-8B', 'Qwen2.5-VL-7B-Instruct']
         include:
-          - model: llava-hf/llava-onevision-qwen2-7b-ov-hf
+          - model: llava-onevision-qwen2-7b-ov-hf
             model_name: llava-onevision-qwen2-7b-ov-hf
-          - model: Qwen/Qwen2.5-VL-7B-Instruct
+          - model: Qwen2.5-VL-7B-Instruct
             model_name: qwen25-vl-7b-instruct
-          - model: OpenGVLab/InternVL3-8B
+          - model: InternVL3-8B
             model_name: internvl3-8b
     steps:
       - name: clone_repo
