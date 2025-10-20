@@ -20,13 +20,28 @@ env:
   HF_HUB_CACHE: /mnt/shared-storage-user/large-model-center-share-weights/hf_hub
   HF_HUB_OFFLINE: 1
   CONDA_PATH: /mnt/shared-storage-user/opencompass-shared/qa-llm-cicd/miniconda3
+  WORK_PATH: /mnt/shared-storage-user/mllm/qa-llm-cicd/pr_wkdir/VLMEvalKit/VLMEvalKit
   CONDA_ENV: vlm_pr_test
   KUBEBRAIN_CLUSTER_ENTRY: https://h.pjlab.org.cn
   KUBEBRAIN_NAMESPACE: ailab-opencompass
 
 jobs:
+  prepare_env:
+    if: ${{!cancelled()}}
+    runs-on: [yidian_cu12_mllm]
+    steps:
+      - name: clone_repo
+        uses: actions/checkout@v3
+      - name: reinstall vlmeval
+        run: |
+          . ${{env.CONDA_PATH}}/bin/activate
+          conda activate ${{env.CONDA_ENV}}
+          pip uninstall vlmeval -y
+          pip install . -i https://pkg.pjlab.org.cn/repository/pypi-proxy/simple/ --trusted-host pkg.pjlab.org.cn --no-cache-dir
+          
   vlm_test:
     if: ${{!cancelled()}}
+    needs: prepare_env
     runs-on: [yidian_cu12_mllm]
     strategy:
       fail-fast: false
@@ -40,17 +55,13 @@ jobs:
         run: |
           . ${{env.CONDA_PATH}}/bin/activate
           conda activate ${{env.CONDA_ENV}}
-          pip uninstall vlmeval -y
-          pip install . -i https://pkg.pjlab.org.cn/repository/pypi-proxy/simple/ --trusted-host pkg.pjlab.org.cn --no-cache-dir
           pre_model=$(echo ${{matrix.model}} | awk -F'/' '{print $1}')
 
           model_name=$(echo ${{matrix.model}} | awk -F'/' '{print $2}')
 
           pip list
-          nvidia-smi
 
-          current_path=${PWD}
-          rjob submit --name=vllm-pr-test-${{ github.run_id }}-${{ github.run_attempt }} --charged-group=opencompass_gpu --private-machine=group --group=opencompass_gpu --gpu=2 --cpu=32 --memory=32568 --private-machine=group --image=registry.h.pjlab.org.cn/ailab-puyu/xpuyu:torch-2.6.0-45d96d5f-0607 --env=HF_HUB_CACHE=/mnt/shared-storage-user/large-model-center-share-weights/hf_hub --env=HF_HUB_OFFLINE=1 --mount=gpfs://gpfs1/opencompass-shared:/mnt/shared-storage-user/opencompass-shared --mount=gpfs://gpfs1/auto-eval-pipeline:/mnt/shared-storage-user/auto-eval-pipeline --mount=gpfs://gpfs1/large-model-center-share-weights:/mnt/shared-storage-user/large-model-center-share-weights --host-network=True -- bash -exc 'cd $current_path; python run.py --data ${{matrix.dataset}} --model $model_name 2>&1'
+          rjob submit --name=vllm-pr-test-${{ github.run_id }}-${{ github.run_attempt }} --charged-group=opencompass_gpu --private-machine=group --group=opencompass_gpu --gpu=2 --cpu=32 --memory=32568 --private-machine=group --image=registry.h.pjlab.org.cn/ailab-puyu/xpuyu:torch-2.6.0-45d96d5f-0607 --env=HF_HUB_CACHE=/mnt/shared-storage-user/large-model-center-share-weights/hf_hub --env=HF_HUB_OFFLINE=1 --mount=gpfs://gpfs1/opencompass-shared:/mnt/shared-storage-user/opencompass-shared --mount=gpfs://gpfs1/auto-eval-pipeline:/mnt/shared-storage-user/auto-eval-pipeline --mount=gpfs://gpfs1/large-model-center-share-weights:/mnt/shared-storage-user/large-model-center-share-weights --mount=gpfs://gpfs1/mllm:/mnt/shared-storage-user/mllm --host-network=True -- bash -exc 'cd ${{env.WORK_PATH}}}; python run.py --data ${{matrix.dataset}} --model $model_name 2>&1'
 
           for i in {1..300}; do
             current_status=$(rjob get vllm-pr-test-${{ github.run_id }}-${{ github.run_attempt }} | grep -oP 'rjob [^:]+: \K[^ ]+')
