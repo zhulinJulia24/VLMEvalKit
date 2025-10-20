@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        model: [Qwen/Qwen2.5-VL-7B-Instruct,OpenGVLab/InternVL3-8B, llava-hf/llava-onevision-qwen2-7b-ov-hf]
+        model: [Qwen2.5-VL-7B-Instruct,InternVL3-8B,llava-onevision-qwen2-7b-ov-hf]
         dataset: ["MMBench_V11_MINI MMStar_MINI AI2D_MINI","OCRBench_MINI"]
     steps:
       - name: clone_repo
@@ -41,13 +41,9 @@ jobs:
         run: |
           . ${{env.CONDA_PATH}}/bin/activate
           conda activate ${{env.CONDA_ENV}}
-          pre_model=$(echo ${{matrix.model}} | awk -F'/' '{print $1}')
-
-          model_name=$(echo ${{matrix.model}} | awk -F'/' '{print $2}')
-
           pip list
 
-          rjob submit --name=vllm-pr-test-${{ github.run_id }}-${{ github.run_attempt }} --charged-group=opencompass_gpu --private-machine=group --group=opencompass_gpu --gpu=2 --cpu=32 --memory=32568 --private-machine=group --image=registry.h.pjlab.org.cn/ailab-puyu-puyu_wsp_cpu/vlmevalkit:auto-v0.0.10 --env=HF_HUB_CACHE=/mnt/shared-storage-user/large-model-center-share-weights/hf_hub --env=HF_HUB_OFFLINE=1 --mount=gpfs://gpfs1/opencompass-shared:/mnt/shared-storage-user/opencompass-shared --mount=gpfs://gpfs1/auto-eval-pipeline:/mnt/shared-storage-user/auto-eval-pipeline --mount=gpfs://gpfs1/large-model-center-share-weights:/mnt/shared-storage-user/large-model-center-share-weights --mount=gpfs://gpfs1/mllm:/mnt/shared-storage-user/mllm --host-network=True -- bash -exc 'cd ${{env.WORK_PATH}}; source /mnt/shared-storage-user/opencompass-shared/qa-llm-cicd/miniconda3/bin/activate; conda activate ${{env.CONDA_ENV}}; python run.py --data ${{matrix.dataset}} --model $model_name 2>&1'
+          rjob submit --name=vllm-pr-test-${{ github.run_id }}-${{ github.run_attempt }} --charged-group=opencompass_gpu --private-machine=group --group=opencompass_gpu --gpu=2 --cpu=32 --memory=32568 --private-machine=group --image=registry.h.pjlab.org.cn/ailab-puyu-puyu_wsp_cpu/vlmevalkit:auto-v0.0.10 --env=HF_HUB_CACHE=/mnt/shared-storage-user/large-model-center-share-weights/hf_hub --env=HF_HUB_OFFLINE=1 --mount=gpfs://gpfs1/opencompass-shared:/mnt/shared-storage-user/opencompass-shared --mount=gpfs://gpfs1/auto-eval-pipeline:/mnt/shared-storage-user/auto-eval-pipeline --mount=gpfs://gpfs1/large-model-center-share-weights:/mnt/shared-storage-user/large-model-center-share-weights --mount=gpfs://gpfs1/mllm:/mnt/shared-storage-user/mllm --host-network=True -- bash -exc 'cd ${{env.WORK_PATH}}; source /mnt/shared-storage-user/opencompass-shared/qa-llm-cicd/miniconda3/bin/activate; conda activate ${{env.CONDA_ENV}}; python run.py --data ${{matrix.dataset}} --model ${{matrix.model}} 2>&1'
 
           for i in {1..300}; do
             current_status=$(rjob get vllm-pr-test-${{ github.run_id }}-${{ github.run_attempt }} | grep -oP 'rjob [^:]+: \K[^ ]+')
@@ -66,7 +62,7 @@ jobs:
           else
               model_name=$(echo ${{matrix.model}} | awk -F'/' '{print $2}')
           fi
-          python .github/scripts/assert_score.py --dataset "${{matrix.dataset}}" --base_score $BASE_SCORE --model-name $model_name
+          python .github/scripts/assert_score.py --dataset "${{matrix.dataset}}" --base_score $BASE_SCORE --model-name ${{matrix.model}}
       - name: Change code permission
         if: always()
         run: |
