@@ -38,7 +38,7 @@ jobs:
           conda activate ${{env.CONDA_ENV}}
           pip uninstall vlmeval -y
           pip install . -i https://pkg.pjlab.org.cn/repository/pypi-proxy/simple/ --trusted-host pkg.pjlab.org.cn --no-cache-dir
-          pip install numpy<2.0.0 -i https://pkg.pjlab.org.cn/repository/pypi-proxy/simple/ --trusted-host pkg.pjlab.org.cn --no-cache-dir
+          pip install numpy==1.23.0 -i https://pkg.pjlab.org.cn/repository/pypi-proxy/simple/ --trusted-host pkg.pjlab.org.cn --no-cache-dir
 
   vlm_test:
     if: ${{!cancelled()}}
