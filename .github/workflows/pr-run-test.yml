@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BASE_SCORE: '{"MMBench_V11_MINI":{"Qwen2.5-VL-7B-Instruct":0.8727272727272727,"InternVL3-8B":0.90909091,"llama3-llava-next-8b-hf":0.8363636363636363},"MMStar_MINI":{"Qwen2.5-VL-7B-Instruct":0.6266666666666667,"InternVL2_5-8B":0.6333333333333333,"llama3-llava-next-8b-hf":0.49333333333333335},"AI2D_MINI":{"Qwen2.5-VL-7B-Instruct":0.7975708502024291,"InternVL3-8B":0.854251012145749,"llama3-llava-next-8b-hf":0.8178137651821862},"OCRBench_MINI":{"Qwen2-VL-7B-Instruct":16.6,"InternVL3-8B":17.1,"llava_onevision_qwen2_7b_si":13.0}}'
+  BASE_SCORE: '{"MMBench_V11_MINI":{"Qwen2.5-VL-7B-Instruct":0.8727272727272727,"InternVL3-8B":0.90909091,"llama3-llava-next-8b-hf":0.8363636363636363},"MMStar_MINI":{"Qwen2.5-VL-7B-Instruct":0.6266666666666667,"InternVL2_5-8B":0.6933333333333334,"llama3-llava-next-8b-hf":0.49333333333333335},"AI2D_MINI":{"Qwen2.5-VL-7B-Instruct":0.7975708502024291,"InternVL3-8B":0.8137651821862348,"llama3-llava-next-8b-hf":0.8178137651821862},"OCRBench_MINI":{"Qwen2-VL-7B-Instruct":16.6,"InternVL3-8B":17.1,"llava_onevision_qwen2_7b_si":13.0}}'
   HF_HUB_CACHE: /mnt/shared-storage-user/large-model-center-share-weights/hf_hub
   HF_HUB_OFFLINE: 1
   CONDA_PATH: /mnt/shared-storage-user/opencompass-shared/qa-llm-cicd/miniconda3
