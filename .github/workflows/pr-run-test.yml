@@ -89,3 +89,4 @@ jobs:
         if: always()
         run: |
           sudo chmod -R 777 .
+          rjob stop vllm-pr-test-${{ github.run_id }}-${{matrix.model_name}}-${{matrix.dataset_name}}-${{ github.run_attempt }} 
