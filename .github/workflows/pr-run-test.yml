@@ -78,8 +78,11 @@ jobs:
               echo "任务成功完成"
               break
             elif [[ $current_status == "Failed" || $current_status == "Stopped" ]]; then
-              echo "任务失败或被停止"
+              echo "任务失败"
               rjob logs job vllm-pr-test-${{ github.run_id }}-${{matrix.model_name}}-${{matrix.dataset_name}}-${{ github.run_attempt }}
+              exit 1
+            elif [[ $current_status == "Failed" || $current_status == "Stopped" ]]; then
+              echo "任务被停止"
               exit 1
             fi
             sleep 6
