@@ -8,6 +8,12 @@ on:
       - "docs/**"
       - "**.md"
   workflow_dispatch:
+    inputs:
+      repo_ref:
+        required: false
+        description: 'Set branch or tag or commit id. Default is "main"'
+        type: string
+        default: 'main'
   schedule:
     - cron:  '56 01 * * *'
 
@@ -32,14 +38,10 @@ jobs:
       fail-fast: false
       matrix:
         dataset: ["MMBench_V11_MINI MMStar_MINI AI2D_MINI","OCRBench_MINI"]
-        model: ['llava-onevision-qwen2-0.5b-ov-hf', 'InternVL3-8B', 'Qwen2.5-VL-7B-Instruct']
+        model: ['Qwen2.5-VL-7B-Instruct']
         include:
-          - model: llava-onevision-qwen2-0.5b-ov-hf
-            model_name: llava
           - model: Qwen2.5-VL-7B-Instruct
             model_name: qwen
-          - model: InternVL3-8B
-            model_name: internvl
           - dataset: MMBench_V11_MINI MMStar_MINI AI2D_MINI
             dataset_name: mmbench
           - dataset: OCRBench_MINI
@@ -47,8 +49,11 @@ jobs:
     steps:
       - name: Clean workdir
         run: sudo git clean -ffdx
-      - name: clone_repo
+      - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          repository: 'open-compass/VLMEvalKit'
+          ref: ${{github.event.inputs.repo_ref || 'main'}}
       - name: reinstall vlmeval
         run: |
           . ${{env.CONDA_PATH}}/bin/activate
